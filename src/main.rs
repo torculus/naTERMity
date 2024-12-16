@@ -20,8 +20,8 @@
 extern crate getopts;
 use getopts::Options;
 
-extern crate term_size;
-use term_size;
+extern crate terminal_size;
+use terminal_size::{Width, Height, terminal_size};
 
 extern crate termion;
 use termion::{color, style, cursor, clear};
@@ -43,7 +43,7 @@ fn main() {
        Err(f) => { panic!("{}", f.to_string()) },
    };
    
-   let mut noel_month: u32;
+   let noel_month: u32;
    if matches.opt_present("j") {
    	noel_month = 7;
    } else if matches.opt_present("o") {
@@ -52,7 +52,7 @@ fn main() {
    	noel_month = 12;
    }
 
-   let mut noel_day: u32;
+   let noel_day: u32;
    match noel_month {
      1 => {noel_day = 6}, 
      _ => {noel_day = 25}, 
@@ -60,7 +60,7 @@ fn main() {
 
    let five_min = time::Duration::from_secs(300);
 
-   let mut dt: chrono::DateTime<Local> = Local::now();
+   let mut dt: chrono::DateTime<Local>;
    let mut selected: u32;
 
    loop {
@@ -89,9 +89,13 @@ fn main() {
 }
 
 fn print_scene(selected: u32) {
-    let Some((term_w, term_h)) = term_size::dimensions();
-    if (term_w < 30 || (term_h < 10) {
-    	//pass
+
+    let size = terminal_size();
+    if let Some((Width(w), Height(h))) = size {
+        let term_w = w;
+	let term_h = h;
+    } else {
+        println!("Unable to get terminal size");
     }
 
     let stars: [&str; 3] = ["
@@ -145,5 +149,5 @@ fn print_scene(selected: u32) {
 }
 
 fn prep_sky(selected: u32) {
-    a
+    //pass
 }
