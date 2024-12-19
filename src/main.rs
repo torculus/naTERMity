@@ -28,6 +28,7 @@ use termion::{color, style, cursor, clear};
 
 use std::{env,thread,time};
 use chrono::{Datelike, Local};
+use rand::Rng;
 
 fn main() {
 
@@ -50,22 +51,22 @@ fn main() {
    	noel_month = 1;
    } else {
    	noel_month = 12;
-   }
+    }
 
-   let noel_day: u32;
-   match noel_month {
-     1 => {noel_day = 6}, 
-     _ => {noel_day = 25}, 
-   }
+    let noel_day: u32;
+    match noel_month {
+      1 => {noel_day = 6}, 
+      _ => {noel_day = 25}, 
+    }
 
-   let five_min = time::Duration::from_secs(300);
+    let five_min = time::Duration::from_secs(300);
 
-   let mut dt: chrono::DateTime<Local>;
-   let mut selected: u32;
+    let mut dt: chrono::DateTime<Local>;
+    let mut selected: u32;
 
    loop {
       //clear the screen on each iteration
-      println!("{}", termion::clear::All);
+      println!("{}",termion::clear::All);
 
       dt = Local::now();
 
@@ -91,11 +92,79 @@ fn main() {
 fn print_scene(selected: u32) {
 
     let size = terminal_size();
+    let term_w: u16;
+    let term_h: u16;
+
     if let Some((Width(w), Height(h))) = size {
-        let term_w = w;
-	let term_h = h;
+        term_w = w;
+	term_h = h;
     } else {
+	term_w = 0;
+	term_h = 0;
         println!("Unable to get terminal size");
+    }
+    let manger: &str = 
+"                                  ./^\\.
+                               .%%.   .%%.
+                           .%%.           .%%.
+                        .%%.                 .%%.
+                     .%%.                       .%%.
+                      ##                         ##
+                      ##                         ##
+                      ##                         ##
+                      ##                         ##
+                      ##         \\\"\"\"\"\"/         ##
+                      ##         / \\ / \\         ##";
+
+    print_manger(selected, term_w);
+
+    loop { //twinkle stars in sky every second
+	print_sky(selected, term_w);
+	print_star(selected, term_w);
+	thread::sleep(time::Duration::from_secs(1));
+    }
+
+}
+
+fn print_manger(selected: u32, width: u16) {
+    let brown = color::Fg(color::Rgb(139,69,19));
+    println!("{goto}{brown}./^\\.",
+    	goto = cursor::Goto(width/2-2, 5));
+}
+
+fn print_sky(selected: u32, width: u16) {
+    let mut rng = rand::thread_rng();
+
+    //clear the sky
+    println!("{goto}{clear}",
+    	goto = cursor::Goto(width,4),
+	clear = clear::BeforeCursor);
+
+    for i in 1..10 {
+        let x = rng.gen_range(0..width);
+        let y = rng.gen_range(0..4);
+	//set a star at (x,y)
+	println!("{goto}{white}*{reset}",
+		goto = cursor::Goto(x,y),
+		white = color::Fg(color::White),
+		reset = color::Fg(color::Reset));
+    }
+}
+
+fn print_star(selected: u32, width: u16) {
+    let yellow = color::Fg(color::Yellow);
+    let reset = color::Fg(color::Reset);
+
+    match selected {
+      0 => { println!("{goto}{yellow}*{reset}",
+      		goto = cursor::Goto(width/2+2, 1));
+	     println!("{goto}{yellow}*{reset}",
+	     	goto = cursor::Goto(width/2, 2));
+	     println!("{goto}{yellow}*{reset}",
+	     	goto = cursor::Goto(width/2-2, 3));},
+      1 => {},
+      2 => {},
+      _ => {},
     }
 
     let stars: [&str; 3] = ["
@@ -110,44 +179,4 @@ fn print_scene(selected: u32) {
 	     *          *           :           *         *
   *                        *     .. * ..            *                *
          *      *                   :      *                  *"];
- 
-	let manger: &str = 
-"                                  ./^\\.
-                               .%%.   .%%.
-                           .%%.           .%%.
-                        .%%.                 .%%.
-                     .%%.                       .%%.
-                      ##                         ##
-                      ##                         ##
-                      ##                         ##
-                      ##                         ##
-                      ##         \\\"\"\"\"\"/         ##
-                      ##         / \\ / \\         ##";
-   
-    if selected == 0 {
-      println!("{white}{}", stars[0],
-         white = color::Fg(color::White));
-      println!("{brown}{manger}",
-         brown = color::Fg(color::Rgb(139,69,19)));
-   } else if selected == 1 {
-      println!("{white}{}", stars[1],
-         white = color::Fg(color::White));
-      println!("{brown}{manger}",
-         brown = color::Fg(color::Rgb(139,69,19)));
-   } else if selected == 2 {
-      println!("{white}{}", stars[2],
-         white = color::Fg(color::White));
-      println!("{brown}{manger}",
-         brown = color::Fg(color::Rgb(139,69,19)));
-   } else if selected == 3 {
-      println!("{white}{}", stars[2],
-         white = color::Fg(color::White));
-      println!("{brown}{manger}",
-         brown = color::Fg(color::Rgb(139,69,19)));
-   }
-   
-}
-
-fn prep_sky(selected: u32) {
-    //pass
 }
