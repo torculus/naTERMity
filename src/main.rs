@@ -116,23 +116,42 @@ fn print_scene(selected: u32) {
                       ##         \\\"\"\"\"\"/         ##
                       ##         / \\ / \\         ##";
 
-    print_manger(selected, term_w);
+    print_manger(term_w);
 
     loop { //twinkle stars in sky every second
-	print_sky(selected, term_w);
+	print_sky(term_w);
 	print_star(selected, term_w);
 	thread::sleep(time::Duration::from_secs(1));
     }
 
 }
 
-fn print_manger(selected: u32, width: u16) {
+fn print_manger(width: u16) {
     let brown = color::Fg(color::Rgb(139,69,19));
-    println!("{goto}{brown}./^\\.",
-    	goto = cursor::Goto(width/2-2, 5));
+    println!("{goto}{brown}./^\\.{reset}",
+    	goto = cursor::Goto(width/2-2, 5),
+	reset = color::Fg(color::Reset));
+    
+    for i in 1..4 {
+        println!("{goto}{brown}.%%.{:^8}.%%.{reset}",
+		goto = cursor::Goto(3,i),
+		reset = color::Fg(color::Reset));
+    }
+
+    for j in 1..6 {
+        println!("{goto}{brown}##{:^12}##{reset}",
+		goto = cursor::Goto(5,j),
+		reset = color::Fg(color::Reset));
+    }
+
+    //print manger
+    println!("{goto}{brown}k{reset}",
+    	goto = cursor::Goto(width/2-3, 10),
+	reset = color::Fg(color::Reset));
+
 }
 
-fn print_sky(selected: u32, width: u16) {
+fn print_sky(width: u16) {
     let mut rng = rand::thread_rng();
 
     //clear the sky
@@ -156,27 +175,24 @@ fn print_star(selected: u32, width: u16) {
     let reset = color::Fg(color::Reset);
 
     match selected {
-      0 => { println!("{goto}{yellow}*{reset}",
-      		goto = cursor::Goto(width/2+2, 1));
-	     println!("{goto}{yellow}*{reset}",
+      0 => { println!("{goto}{yellow}*{reset}",//         *
+      		goto = cursor::Goto(width/2+2, 1));//   *
+	     println!("{goto}{yellow}*{reset}",//     *
 	     	goto = cursor::Goto(width/2, 2));
 	     println!("{goto}{yellow}*{reset}",
 	     	goto = cursor::Goto(width/2-2, 3));},
-      1 => {},
-      2 => {},
-      _ => {},
+      1 => { println!("{goto}{yellow}.{reset}",//       .
+      		goto = cursor::Goto(width/2, 1));//   . * .
+	     println!("{goto}{yellow}. * .{reset}",//   .
+	     	goto = cursor::Goto(width/2-2, 2));
+	     println!("{goto}{yellow}.{reset}",
+	     	goto = cursor::Goto(width/2, 3));},
+      _ => { println!("{goto}{yellow}:{reset}",//       :
+      		goto = cursor::Goto(width/2, 1));//  .. * ..
+	     println!("{goto}{yellow}.. * ..{reset}",// :
+	     	goto = cursor::Goto(width/2-3, 2));
+	     println!("{goto}{yellow}:{reset}",
+	     	goto = cursor::Goto(width/2, 3));},
     }
 
-    let stars: [&str; 3] = ["
-             *          *             *         *         *
-  *                        *        *               *                *
-         *      *                *         *                  *",
-"
-	     *          *           .           *         *
-  *                        *      . * .             *                *
-         *      *                   .      *                  *",
-"
-	     *          *           :           *         *
-  *                        *     .. * ..            *                *
-         *      *                   :      *                  *"];
 }
