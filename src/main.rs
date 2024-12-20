@@ -147,10 +147,10 @@ fn print_stable_manger(width: u16, height: u16) {
 
     //print manger
     println!("{goto}{brown}{straw}{reset}",
-    	goto = cursor::Goto(width/2-3, height-1),
+    	goto = cursor::Goto(width/2-3, height-2),
     	straw = r#"\"""""/"#);
     println!("{goto}{brown}{legs}{reset}",
-    	goto = cursor::Goto(width/2-3, height),
+    	goto = cursor::Goto(width/2-3, height-1),
     	legs = r#"/ \ / \"#);
 
 }
@@ -164,7 +164,7 @@ fn print_sky(width: u16) {
 	clear = clear::BeforeCursor);
 
     for _i in 1..10 {
-        let x = rng.gen_range(0..width);
+        let x = rng.gen_range(0..width-1);
         let y = rng.gen_range(0..4);
 	//set a star at (x,y)
 	println!("{goto}{white}*{reset}",
@@ -199,6 +199,28 @@ fn print_star(selected: u32, width: u16) {
 	     	goto = cursor::Goto(width/2, 3));},
     }
 
+    loop {
+        println!("{goto}{yellow}/ | \\{reset}",
+		goto = cursor::Goto(width/2-2,4));
+	thread::sleep(time::Duration::from_secs(1));
+        println!("{goto}{yellow}/  |  \\{reset}",
+		goto = cursor::Goto(width/2-3,5));
+	thread::sleep(time::Duration::from_secs(1));
+        println!("{goto}{yellow}/   |   \\{reset}",
+		goto = cursor::Goto(width/2-4,6));
+	thread::sleep(time::Duration::from_secs(1));
+
+	//clear the rays
+        println!("{goto}{clear}{goto2}{clear2}{goto3}{clear3}",
+		goto = cursor::Goto(1,4),
+		clear = clear::CurrentLine,
+		goto2 = cursor::Goto(1,5),
+		clear2 = clear::CurrentLine,
+		goto3 = cursor::Goto(1,6),
+		clear3 = clear::CurrentLine);
+	thread::sleep(time::Duration::from_secs(1));
+    }
+
 }
 
 fn print_mary_joseph(width: u16, height: u16) {
@@ -209,25 +231,25 @@ fn print_mary_joseph(width: u16, height: u16) {
 
     //print Mary
     println!("{goto}{blue}.@{reset}",
-    	goto = cursor::Goto(width/2-6, height-3));
+    	goto = cursor::Goto(width/2-6, height-4));
     println!("{goto}{blue}%%#{reset}",
-    	goto = cursor::Goto(width/2-6, height-2));
+    	goto = cursor::Goto(width/2-6, height-3));
     println!("{goto}{blue}%%{reset}",
-    	goto = cursor::Goto(width/2-6, height-1));
+    	goto = cursor::Goto(width/2-6, height-2));
     println!("{goto}{blue}%%%{reset}",
-    	goto = cursor::Goto(width/2-7, height));
+    	goto = cursor::Goto(width/2-7, height-1));
 
     //print Joseph
     println!("{goto}{brown}? {green}@{reset}",
-    	goto = cursor::Goto(width/2+5, height-4));
+    	goto = cursor::Goto(width/2+5, height-5));
     println!("{goto}{brown}|{green}#%\\{reset}",
+    	goto = cursor::Goto(width/2+5, height-4));
+    println!("{goto}{brown}| {green}%%%{reset}",
     	goto = cursor::Goto(width/2+5, height-3));
     println!("{goto}{brown}| {green}%%%{reset}",
     	goto = cursor::Goto(width/2+5, height-2));
-    println!("{goto}{brown}| {green}%%%{reset}",
-    	goto = cursor::Goto(width/2+5, height-1));
     println!("{goto}{brown}|  {green}%%%{reset}",
-    	goto = cursor::Goto(width/2+5, height));
+    	goto = cursor::Goto(width/2+5, height-1));
 }
 
 fn print_jesus(width: u16, height: u16) {
@@ -235,7 +257,7 @@ fn print_jesus(width: u16, height: u16) {
     let reset = color::Fg(color::Reset);
 
     println!("{goto}{blue}@###{reset}",
-    	goto = cursor::Goto(width/2-2, height-2));
+    	goto = cursor::Goto(width/2-2, height-3));
 }
 
 fn print_magi(width: u16, height: u16) {
@@ -245,15 +267,15 @@ fn print_magi(width: u16, height: u16) {
 
     //print Magi
     println!("{goto}{brown}@   %{reset}",
-    	goto = cursor::Goto(width/2+31, height-5));
+    	goto = cursor::Goto(width/2+31, height-6));
     println!("{goto}{green}@    @    @   {brown}#%%%%%%{reset}",
-    	goto = cursor::Goto(width/2+18, height-4));
+    	goto = cursor::Goto(width/2+18, height-5));
     println!("{goto}{brown}#%%\\ #%%\\ #%%\\ %%%%%%%%{reset}",
-    	goto = cursor::Goto(width/2+17, height-3));
+    	goto = cursor::Goto(width/2+17, height-4));
     println!("{goto}{brown}%%%  %%%  %%%  #%%%%={reset}",
-    	goto = cursor::Goto(width/2+18, height-2));
+    	goto = cursor::Goto(width/2+18, height-3));
     println!("{goto}{brown}%%%  %%%  %%%  =    ={reset}",
-    	goto = cursor::Goto(width/2+18, height-1));
+    	goto = cursor::Goto(width/2+18, height-2));
     println!("{goto}{brown}%%%  %%%  %%% .=   .={reset}",
-    	goto = cursor::Goto(width/2+18, height));
+    	goto = cursor::Goto(width/2+18, height-1));
 }
