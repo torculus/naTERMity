@@ -33,6 +33,7 @@ use rand::Rng;
 fn main() {
 
    let args: Vec<String> = env::args().collect();
+   let program = args[0].clone();
 
    let mut opts: Options = Options::new();
    opts.optflag("h", "help", "print this help menu");
@@ -44,6 +45,11 @@ fn main() {
        Err(f) => { panic!("{}", f.to_string()) },
    };
    
+    if matches.opt_present("h") {
+        print_usage(&program, opts);
+        return;
+    }
+
    let noel_month: u32;
    if matches.opt_present("j") {
    	noel_month = 7;
@@ -84,8 +90,6 @@ fn main() {
         selected = 0;
       }
 
-      selected = 3;
-
       print_scene(selected);
       thread::sleep(five_min);
    }
@@ -118,9 +122,16 @@ fn print_scene(selected: u32) {
 		print_magi(term_w, term_h);},
     }
 
+    let mut round: u16 = 1;
     loop { //twinkle stars in sky every second
 	print_sky(term_w);
 	print_star(selected, term_w);
+
+	if selected > 1 {
+	  print_rays(term_w, round);
+	  round = (round+1) % 4;
+	}
+
 	thread::sleep(time::Duration::from_secs(1));
     }
 
@@ -128,6 +139,7 @@ fn print_scene(selected: u32) {
 
 fn print_stable_manger(width: u16, height: u16) {
     let brown = color::Fg(color::Rgb(139,69,19));
+    let yellow = color::Fg(color::Yellow);
     let reset = color::Fg(color::Reset);
 
     println!("{goto}{brown}./^\\.{reset}",
@@ -146,9 +158,9 @@ fn print_stable_manger(width: u16, height: u16) {
     }
 
     //print manger
-    println!("{goto}{brown}{straw}{reset}",
+    println!("{goto}{brown}\\{yellow}{straw}{brown}/{reset}",
     	goto = cursor::Goto(width/2-3, height-2),
-    	straw = r#"\"""""/"#);
+    	straw = r#"""""""#);
     println!("{goto}{brown}{legs}{reset}",
     	goto = cursor::Goto(width/2-3, height-1),
     	legs = r#"/ \ / \"#);
@@ -164,8 +176,9 @@ fn print_sky(width: u16) {
 	clear = clear::BeforeCursor);
 
     for _i in 1..10 {
-        let x = rng.gen_range(0..width-1);
-        let y = rng.gen_range(0..4);
+	//generating (0,0) will throw an error: Goto is one-based
+        let x = rng.gen_range(1..width-1);
+        let y = rng.gen_range(1..4);
 	//set a star at (x,y)
 	println!("{goto}{white}*{reset}",
 		goto = cursor::Goto(x,y),
@@ -197,28 +210,6 @@ fn print_star(selected: u32, width: u16) {
 	     	goto = cursor::Goto(width/2-3, 2));
 	     println!("{goto}{yellow}:{reset}",
 	     	goto = cursor::Goto(width/2, 3));},
-    }
-
-    loop {
-        println!("{goto}{yellow}/ | \\{reset}",
-		goto = cursor::Goto(width/2-2,4));
-	thread::sleep(time::Duration::from_secs(1));
-        println!("{goto}{yellow}/  |  \\{reset}",
-		goto = cursor::Goto(width/2-3,5));
-	thread::sleep(time::Duration::from_secs(1));
-        println!("{goto}{yellow}/   |   \\{reset}",
-		goto = cursor::Goto(width/2-4,6));
-	thread::sleep(time::Duration::from_secs(1));
-
-	//clear the rays
-        println!("{goto}{clear}{goto2}{clear2}{goto3}{clear3}",
-		goto = cursor::Goto(1,4),
-		clear = clear::CurrentLine,
-		goto2 = cursor::Goto(1,5),
-		clear2 = clear::CurrentLine,
-		goto3 = cursor::Goto(1,6),
-		clear3 = clear::CurrentLine);
-	thread::sleep(time::Duration::from_secs(1));
     }
 
 }
@@ -253,29 +244,58 @@ fn print_mary_joseph(width: u16, height: u16) {
 }
 
 fn print_jesus(width: u16, height: u16) {
-    let blue = color::Fg(color::Blue);
+    let white = color::Fg(color::White);
     let reset = color::Fg(color::Reset);
 
-    println!("{goto}{blue}@###{reset}",
+    println!("{goto}{white}@###{reset}",
     	goto = cursor::Goto(width/2-2, height-3));
 }
 
 fn print_magi(width: u16, height: u16) {
     let brown = color::Fg(color::Rgb(139,69,19));
+    let yellow = color::Fg(color::Yellow);
+    let red = color::Fg(color::Red);
+    let purple = color::Fg(color::Rgb(159,43,154));
+    let orange = color::Fg(color::Rgb(255,87,51));
     let green = color::Fg(color::Green);
     let reset = color::Fg(color::Reset);
 
     //print Magi
-    println!("{goto}{brown}@   %{reset}",
-    	goto = cursor::Goto(width/2+31, height-6));
-    println!("{goto}{green}@    @    @   {brown}#%%%%%%{reset}",
+    println!("{goto}{yellow}_     _     _  {brown}@   %{reset}",
+    	goto = cursor::Goto(width/2+18, height-6));
+    println!("{goto}{red}@     {purple}@     {orange}@   {brown}#%%%%%%{reset}",
     	goto = cursor::Goto(width/2+18, height-5));
-    println!("{goto}{brown}#%%\\ #%%\\ #%%\\ %%%%%%%%{reset}",
-    	goto = cursor::Goto(width/2+17, height-4));
-    println!("{goto}{brown}%%%  %%%  %%%  #%%%%={reset}",
-    	goto = cursor::Goto(width/2+18, height-3));
-    println!("{goto}{brown}%%%  %%%  %%%  =    ={reset}",
+    println!("{goto}{yellow}# {red}%%\\ {green}^ {purple}%%\\ {purple}o {orange}%%\\ {brown}%%%%%%%%{reset}",
+    	goto = cursor::Goto(width/2+16, height-4));
+    println!("{goto}{yellow}#{red}#%%% {green}#{purple}#%%% {purple}#{orange}#%%%  {brown}#%%%%={reset}",
+    	goto = cursor::Goto(width/2+16, height-3));
+    println!("{goto}{red}%%%   {purple}%%%   {orange}%%%  {brown}=    ={reset}",
     	goto = cursor::Goto(width/2+18, height-2));
-    println!("{goto}{brown}%%%  %%%  %%% .=   .={reset}",
+    println!("{goto}{red}%%%   {purple}%%%   {orange}%%% {brown}.=   .={reset}",
     	goto = cursor::Goto(width/2+18, height-1));
+}
+
+fn print_rays(width: u16, round: u16) {
+    let yellow = color::Fg(color::Yellow);
+    let reset = color::Fg(color::Reset);
+
+    //print star rays
+    println!("{goto}{yellow}/{goto2}|{goto3}\\{reset}",
+    	goto = cursor::Goto(width/2-1-round,4+round),
+	goto2 = cursor::Goto(width/2,4+round),
+	goto3 = cursor::Goto(width/2+1+round,4+round));
+    if round == 0 {
+    	//clear the rays
+	println!("{goto}{clear}{goto2}{clear}{goto3}{clear}{goto4}{clear}",
+		goto = cursor::Goto(1,4),
+		goto2 = cursor::Goto(1,5),
+		goto3 = cursor::Goto(1,6),
+		goto4 = cursor::Goto(1,7),
+		clear = clear::CurrentLine);
+    }
+}
+
+fn print_usage(program: &str, opts: Options) {
+    let brief = format!("Usage: {} [options]", program);
+    print!("{}", opts.usage(&brief));
 }
