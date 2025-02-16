@@ -1,5 +1,5 @@
 /* naTERMity - an animated nativity terminal screensaver
- * Copyright (C) 2024 Benjamin S Osenbach
+ * Copyright (C) 2024-2025 Benjamin S Osenbach
  *
  * Inspired by ChristBASHTree (https://github.com/sergiolepore/ChristBASHTree)
  *
@@ -23,8 +23,8 @@ use getopts::Options;
 extern crate terminal_size;
 use terminal_size::{terminal_size, Height, Width};
 
-extern crate termion;
-use termion::{clear, color, cursor};
+extern crate crossterm;
+use crossterm::{cursor, style, terminal};
 
 use chrono::{Datelike, Local};
 use rand::Rng;
@@ -73,7 +73,7 @@ fn main() {
 
     loop {
         //clear the screen on each iteration
-        println!("{}", termion::clear::All);
+        stdout.execute(Clear(terminal::ClearType::All))?;
 
         dt = Local::now();
 
