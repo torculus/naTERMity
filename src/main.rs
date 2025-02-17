@@ -20,17 +20,19 @@
 extern crate getopts;
 use getopts::Options;
 
-extern crate terminal_size;
-use terminal_size::{terminal_size, Height, Width};
-
 extern crate crossterm;
 use crossterm::{cursor, style, terminal};
 
 use chrono::{Datelike, Local};
 use rand::Rng;
-use std::{env, thread, time};
+use std::{env, io, thread, time};
 
 fn main() {
+    let mut stdout: Stdout = stdout();
+    terminal::enable_raw_mode()?;
+    stdout.execute(EnterAlternateScreen)?;
+    stdout.execute(Hide)?;
+
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
 
@@ -100,14 +102,7 @@ fn print_scene(selected: u32) {
     let term_w: u16;
     let term_h: u16;
 
-    if let Some((Width(w), Height(h))) = size {
-        term_w = w;
-        term_h = h;
-    } else {
-        term_w = 0;
-        term_h = 0;
-        println!("Unable to get terminal size");
-    }
+    let (term_w, term_h) = size()?;
 
     print_stable_manger(term_w, term_h);
 
@@ -138,16 +133,13 @@ fn print_scene(selected: u32) {
             round = (round + 1) % 4;
         }
 
-        println!("{}", cursor::Hide);
-
         thread::sleep(time::Duration::from_secs(1));
     }
 }
 
 fn print_stable_manger(width: u16, height: u16) {
-    let brown = color::Fg(color::Rgb(139, 69, 19));
-    let yellow = color::Fg(color::Yellow);
-    let reset = color::Fg(color::Reset);
+    let brown = color::Rgb(139, 69, 19);
+    let yellow = color::Yellow;
 
     println!(
         "{goto}{brown}./^\\.{reset}",
