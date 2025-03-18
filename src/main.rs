@@ -22,16 +22,29 @@ use getopts::Options;
 
 extern crate crossterm;
 use crossterm::{cursor, queue, QueueableCommand, style, terminal};
+use crate::crossterm::style::Stylize;
+use crossterm::style::Color;
+use crossterm::cursor::MoveTo;
+use crossterm::cursor::Hide;
+use crossterm::terminal::EnterAlternateScreen;
+use crossterm::terminal::Clear;
+use crossterm::execute;
+use crossterm::style::PrintStyledContent;
+use std::io::stdout;
+use crossterm::terminal::size;
+use crate::crossterm::ExecutableCommand;
 
 use chrono::{Datelike, Local};
 use rand::Rng;
 use std::{env, io, thread, time};
 
+const brown: Color = Color::Rgb { r: 139, g: 69, b: 19 };
+
 fn main() {
-    let mut stdout: Stdout = stdout();
-    terminal::enable_raw_mode()?;
-    stdout.execute(EnterAlternateScreen)?;
-    stdout.execute(Hide)?;
+    let mut stdout = stdout();
+    terminal::enable_raw_mode();
+    stdout.execute(EnterAlternateScreen);
+    stdout.execute(Hide);
 
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
@@ -75,7 +88,7 @@ fn main() {
 
     loop {
         //clear the screen on each iteration
-        stdout.execute(Clear(terminal::ClearType::All))?;
+        stdout.execute(Clear(terminal::ClearType::All));
 
         dt = Local::now();
 
@@ -98,10 +111,11 @@ fn main() {
 }
 
 fn print_scene(selected: u32) {
-    //let term_w: u16;
-    //let term_h: u16;
-
-    let (term_w: u16, term_h: u16) = size()?;
+    let size = size();
+    let (term_w, term_h) = match size {
+        Ok(size) => size,
+	Err(error) => panic!("{}", error.to_string()),
+    };
 
     print_stable_manger(term_w, term_h);
 
@@ -137,14 +151,7 @@ fn print_scene(selected: u32) {
 }
 
 fn print_stable_manger(width: u16, height: u16) {
-    let brown = Color::Rgb(139, 69, 19);
-    let yellow = Color::Yellow;
-
-    /*println!(
-        "{goto}{brown}./^\\.{reset}",
-        goto = cursor::Goto(width / 2 - 2, height - 11)
-    );*/
-
+    let mut stdout = stdout();
     queue!(stdout,
     	MoveTo(width / 2 - 2, height - 11),
 	PrintStyledContent("./^\\.".with(brown))
@@ -152,12 +159,6 @@ fn print_stable_manger(width: u16, height: u16) {
 
     for i in 1..5 {
         //stable roof
-        /*println!(
-            "{goto}{brown}.%%.{goto2}.%%.{reset}",
-            goto = cursor::Goto(width / 2 - 2 - 3 * i, height - 11 + i),
-            goto2 = cursor::Goto(width / 2 - 1 + 3 * i, height - 11 + i)
-        );*/
-
 	queue!(stdout,
 	    MoveTo(width / 2 - 2 - 3 * i, height - 11 + i),
 	    PrintStyledContent(".%%.".with(brown)),
@@ -168,12 +169,6 @@ fn print_stable_manger(width: u16, height: u16) {
 
     for j in 1..7 {
         //stable walls
-        /*println!(
-            "{goto}{brown}##{goto2}##{reset}",
-            goto = cursor::Goto(width / 2 - 13, height - 7 + j),
-            goto2 = cursor::Goto(width / 2 + 12, height - 7 + j)
-        );*/
-
 	queue!(stdout,
 	    MoveTo(width / 2 - 13, height - 7 + j),
 	    PrintStyledContent("##".with(brown)),
@@ -183,20 +178,9 @@ fn print_stable_manger(width: u16, height: u16) {
     }
 
     //print manger
-    /*println!(
-        "{goto}{brown}\\{yellow}{straw}{brown}/{reset}",
-        goto = cursor::Goto(width / 2 - 3, height - 2),
-        straw = r#"""""""#
-    );
-    println!(
-        "{goto}{brown}{legs}{reset}",
-        goto = cursor::Goto(width / 2 - 3, height - 1),
-        legs = r#"/ \ / \"#
-    );*/
-
     queue!(stdout,
 	MoveTo(width / 2 - 3, height - 2),
-	PrintStyledContent(r#"""""""#.with(yellow)),
+	PrintStyledContent(r#"""""""#.yellow()),
 	MoveTo(width / 2 - 3, height - 1),
 	PrintStyledContent(r#"/ \ / \"#.with(brown))
 	);
@@ -204,141 +188,120 @@ fn print_stable_manger(width: u16, height: u16) {
 
 fn print_sky(width: u16) {
     let mut rng = rand::thread_rng();
+    let mut stdout = stdout();
 
     //clear the sky
-    /*println!(
-        "{goto}{clear}",
-        goto = cursor::Goto(width, 4),
-        //clear = clear::BeforeCursor
-    );*/
-
-    stdout.execute(Clear(terminal::ClearType::FromCursorUp))?;
+    execute!(stdout,
+	MoveTo(width, 4),
+	Clear(terminal::ClearType::FromCursorUp)
+	);
 
     for _i in 1..10 {
         //generating (0,0) will throw an error: Goto is one-based
         let x = rng.gen_range(1..width - 1);
         let y = rng.gen_range(1..4);
-        //set a star at (x,y)
-        /*println!(
-            "{goto}{white}*{reset}",
-            goto = cursor::Goto(x, y),
-            white = Color::Fg(Color::White),
-            reset = Color::Fg(Color::Reset)
-        );*/
 
+        //set a star at (x,y)
 	queue!(stdout,
 	    MoveTo(x, y),
-	    PrintStyledContent("*".with(Color::White))
+	    PrintStyledContent("*".white())
 	    );
     }
 }
 
 fn print_star(selected: u32, width: u16) {
-    let yellow = Color::Fg(Color::Yellow);
-    let reset = Color::Fg(Color::Reset);
-
+    let mut stdout = stdout();
     match selected {
         0 => {
 	    queue!(stdout,
 		MoveTo(width / 2 + 2, 1),
-		PrintStyledContent("*".with(yellow)),
+		PrintStyledContent("*".yellow()),
 		MoveTo(width / 2, 2),
-		PrintStyledContent("*".with(yellow)),
+		PrintStyledContent("*".yellow()),
 		MoveTo(width / 2 - 2, 3),
-		PrintStyledContent("*".with(yellow))
+		PrintStyledContent("*".yellow())
 		);
         }
         1 => {
 	    queue!(stdout,
 		MoveTo(width / 2, 1),
-		PrintStyledContent(".".with(yellow)),
+		PrintStyledContent(".".yellow()),
 		MoveTo(width / 2 - 2, 2),
-		PrintStyledContent(". * .".with(yellow)),
+		PrintStyledContent(". * .".yellow()),
 		MoveTo(width / 2, 3),
-		PrintStyledContent(".".with(yellow))
+		PrintStyledContent(".".yellow())
 		);
         }
         _ => {
 	    queue!(stdout,
 		MoveTo(width / 2, 1),
-		PrintStyledContent(":".with(yellow)),
+		PrintStyledContent(":".yellow()),
 		MoveTo(width / 2 - 3, 2),
-		PrintStyledContent(".. * ..".with(yellow)),
+		PrintStyledContent(".. * ..".yellow()),
 		MoveTo(width / 2, 3),
-		PrintStyledContent(":".with(yellow))
+		PrintStyledContent(":".yellow())
 		);
         }
     }
 }
 
 fn print_mary_joseph(width: u16, height: u16) {
-    let blue = Color::Fg(Color::Blue);
-    let brown = Color::Fg(Color::Rgb(139, 69, 19));
-    let green = Color::Fg(Color::Green);
-    let reset = Color::Fg(Color::Reset);
+    let mut stdout = stdout();
 
     //print Mary
-    println!(
-        "{goto}{blue}.@{reset}",
-        goto = cursor::Goto(width / 2 - 6, height - 4)
-    );
-    println!(
-        "{goto}{blue}%%#{reset}",
-        goto = cursor::Goto(width / 2 - 6, height - 3)
-    );
-    println!(
-        "{goto}{blue}%%{reset}",
-        goto = cursor::Goto(width / 2 - 6, height - 2)
-    );
-    println!(
-        "{goto}{blue}%%%{reset}",
-        goto = cursor::Goto(width / 2 - 7, height - 1)
-    );
+    queue!(stdout,
+	MoveTo(width / 2 - 6, height - 4),
+	PrintStyledContent(".@".blue()),
+	MoveTo(width / 2 - 6, height - 3),
+	PrintStyledContent("%%#".blue()),
+	MoveTo(width / 2 - 6, height - 2),
+	PrintStyledContent("%%".blue()),
+	MoveTo(width / 2 - 7, height - 1),
+	PrintStyledContent("%%%".blue())
+	);
 
-    //print Joseph
-    println!(
-        "{goto}{brown}? {green}@{reset}",
-        goto = cursor::Goto(width / 2 + 5, height - 5)
-    );
-    println!(
-        "{goto}{brown}|{green}#%\\{reset}",
-        goto = cursor::Goto(width / 2 + 5, height - 4)
-    );
-    println!(
-        "{goto}{brown}| {green}%%%{reset}",
-        goto = cursor::Goto(width / 2 + 5, height - 3)
-    );
-    println!(
-        "{goto}{brown}| {green}%%%{reset}",
-        goto = cursor::Goto(width / 2 + 5, height - 2)
-    );
-    println!(
-        "{goto}{brown}|  {green}%%%{reset}",
-        goto = cursor::Goto(width / 2 + 5, height - 1)
-    );
+    queue!(stdout,
+	// Joseph's staff
+	MoveTo(width / 2 + 5, height - 5),
+	PrintStyledContent("?".with(brown)),
+	MoveTo(width / 2 + 5, height - 4),
+	PrintStyledContent("|".with(brown)),
+	MoveTo(width / 2 + 5, height - 3),
+	PrintStyledContent("|".with(brown)),
+	MoveTo(width / 2 + 5, height - 2),
+	PrintStyledContent("|".with(brown)),
+	MoveTo(width / 2 + 5, height - 1),
+	PrintStyledContent("|".with(brown)),
+	// Joseph's body
+	MoveTo(width / 2 + 7, height - 5),
+	PrintStyledContent("@".green()),
+	MoveTo(width / 2 + 6, height - 4),
+	PrintStyledContent("#%".green()),
+	MoveTo(width / 2 + 7, height - 3),
+	PrintStyledContent("%%%".green()),
+	MoveTo(width / 2 + 7, height - 2),
+	PrintStyledContent("%%%".green()),
+	MoveTo(width / 2 + 8, height - 1),
+	PrintStyledContent("%%%".green())
+	);
 }
 
 fn print_jesus(width: u16, height: u16) {
-    let white = Color::Fg(Color::White);
-    let reset = Color::Fg(Color::Reset);
+    let mut stdout = stdout();
 
-    println!(
-        "{goto}{white}@###{reset}",
-        goto = cursor::Goto(width / 2 - 2, height - 3)
-    );
+    queue!(stdout,
+	MoveTo(width / 2 - 2, height - 3),
+	PrintStyledContent("@##".white())
+	);
 }
 
 fn print_magi(width: u16, height: u16) {
-    let brown = Color::Fg(Color::Rgb(139, 69, 19));
-    let yellow = Color::Fg(Color::Yellow);
-    let red = Color::Fg(Color::Red);
-    let purple = Color::Fg(Color::Rgb(159, 43, 154));
-    let orange = Color::Fg(Color::Rgb(255, 87, 51));
-    let green = Color::Fg(Color::Green);
-    let reset = Color::Fg(Color::Reset);
+    let purple = Color::Rgb { r: 159, g: 43, b: 154 };
+    let orange = Color::Rgb { r: 255, g: 87, b: 51 };
+    let mut stdout = stdout();
 
     //print Magi
-    println!(
+    /*println!(
         "{goto}{yellow}_     _     _  {brown}@   %{reset}",
         goto = cursor::Goto(width / 2 + 18, height - 6)
     );
@@ -359,30 +322,27 @@ fn print_magi(width: u16, height: u16) {
     println!(
         "{goto}{red}%%%   {purple}%%%   {orange}%%% {brown}.=   .={reset}",
         goto = cursor::Goto(width / 2 + 18, height - 1)
-    );
+    );*/
 }
 
 fn print_rays(width: u16, round: u16) {
-    let yellow = Color::Fg(Color::Yellow);
-    let reset = Color::Fg(Color::Reset);
+    let mut stdout = stdout();
 
-    //print star rays
-    println!(
-        "{goto}{yellow}/{goto2}|{goto3}\\{reset}",
-        goto = cursor::Goto(width / 2 - 1 - round, 4 + round),
-        goto2 = cursor::Goto(width / 2, 4 + round),
-        goto3 = cursor::Goto(width / 2 + 1 + round, 4 + round)
-    );
+    queue!(stdout,
+	MoveTo(width / 2 - 1 - round, 4 + round),
+	PrintStyledContent("/".yellow()),
+	MoveTo(width / 2, 4 + round),
+	PrintStyledContent("|".yellow()),
+	MoveTo(width / 2 + 1 + round, 4 + round),
+	PrintStyledContent("\\".yellow())
+	);
+
     if round == 0 {
         //clear the rays
-        println!(
-            "{goto}{clear}{goto2}{clear}{goto3}{clear}{goto4}{clear}",
-            goto = cursor::Goto(1, 4),
-            goto2 = cursor::Goto(1, 5),
-            goto3 = cursor::Goto(1, 6),
-            goto4 = cursor::Goto(1, 7),
-            clear = clear::CurrentLine
-        );
+	queue!(stdout,
+	    MoveTo(width, 7),
+	    PrintStyledContent("\\".yellow())
+	    );
     }
 }
 
