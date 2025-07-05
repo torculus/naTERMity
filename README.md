@@ -7,7 +7,7 @@ naTERMity is an animated nativity terminal screensaver inspired by ChristBASHTre
 ![](scenes.avif)
 
 ## Roadmap
+- [ ] Animate magi walking in between Christmas and Epiphany
 - [x] Twinkling stars
 - [x] Resize when terminal size changes (using `terminal_size`) crate
-- [ ] Animate magi walking in between Christmas and Epiphany
 - [x] Account for Western, Orthodox, and July Christmas
