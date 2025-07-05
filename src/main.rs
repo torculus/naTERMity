@@ -60,8 +60,8 @@ const ORANGE: Color = Color::Rgb {
 
 fn main() {
     let mut stdout = stdout();
-    terminal::enable_raw_mode();
-    execute!(stdout, EnterAlternateScreen, Hide);
+    terminal::enable_raw_mode().unwrap();
+    execute!(stdout, EnterAlternateScreen, Hide).unwrap();
 
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
@@ -123,9 +123,6 @@ fn main() {
             _ => scene = 0,
         }
 
-        //DEBUGGING, REMOVE WHEN DONE
-        scene = 3;
-
         let (mut term_w, mut term_h) = size().unwrap();
 
         print_scene(scene, term_w, term_h);
@@ -136,8 +133,8 @@ fn main() {
                 match read().unwrap() {
                     Event::Key(_event) => {
                         //quit nicely on keypress
-                        execute!(stdout, Show, LeaveAlternateScreen);
-                        terminal::disable_raw_mode();
+                        execute!(stdout, Show, LeaveAlternateScreen).unwrap();
+                        terminal::disable_raw_mode().unwrap();
                         std::process::exit(0)
                     }
                     Event::Resize(new_w, new_h) => {
@@ -150,8 +147,8 @@ fn main() {
             }
 
             //twinkle stars in sky every second
-            print_sky(term_w);
-            print_star(scene, term_w);
+            print_sky(term_w).unwrap();
+            print_star(scene, term_w).unwrap();
             round = (round + 1) % 4;
             if scene > 1 {
                 match round {
@@ -173,23 +170,23 @@ fn print_scene(scene: u32, term_w: u16, term_h: u16) {
     let mut stdout = stdout();
 
     //clear the screen on each iteration
-    execute!(stdout, Clear(terminal::ClearType::All));
+    execute!(stdout, Clear(terminal::ClearType::All)).unwrap();
 
-    print_stable_manger(term_w, term_h);
+    print_stable_manger(term_w, term_h).unwrap();
 
     match scene {
         0 => {}
         1 => {
-            print_mary_joseph(term_w, term_h);
+            print_mary_joseph(term_w, term_h).unwrap();
         }
         2 => {
-            print_mary_joseph(term_w, term_h);
-            print_jesus(term_w, term_h);
+            print_mary_joseph(term_w, term_h).unwrap();
+            print_jesus(term_w, term_h).unwrap();
         }
         _ => {
-            print_mary_joseph(term_w, term_h);
-            print_jesus(term_w, term_h);
-            print_magi(term_w, term_h);
+            print_mary_joseph(term_w, term_h).unwrap();
+            print_jesus(term_w, term_h).unwrap();
+            print_magi(term_w, term_h).unwrap();
         }
     }
 }
@@ -200,7 +197,7 @@ fn print_stable_manger(width: u16, height: u16) -> io::Result<()> {
         stdout,
         MoveTo(width / 2 - 2, height - 11),
         PrintStyledContent("./^\\.".with(BROWN))
-    );
+    )?;
 
     for i in 1..5 {
         //stable roof
@@ -210,7 +207,7 @@ fn print_stable_manger(width: u16, height: u16) -> io::Result<()> {
             PrintStyledContent(".%%.".with(BROWN)),
             MoveTo(width / 2 - 1 + 3 * i, height - 11 + i),
             PrintStyledContent(".%%.".with(BROWN))
-        );
+        )?;
     }
 
     for j in 1..7 {
@@ -221,7 +218,7 @@ fn print_stable_manger(width: u16, height: u16) -> io::Result<()> {
             PrintStyledContent("##".with(BROWN)),
             MoveTo(width / 2 + 12, height - 7 + j),
             PrintStyledContent("##".with(BROWN))
-        );
+        )?;
     }
 
     //print manger
@@ -243,7 +240,7 @@ fn print_sky(width: u16) -> io::Result<()> {
         stdout,
         MoveTo(width, 4),
         Clear(terminal::ClearType::FromCursorUp)
-    );
+    )?;
 
     for _i in 1..10 {
         //generating (0,0) will throw an error: Goto is one-based
@@ -251,7 +248,7 @@ fn print_sky(width: u16) -> io::Result<()> {
         let y = rng.gen_range(1..4);
 
         //set a star at (x,y)
-        execute!(stdout, MoveTo(x, y), PrintStyledContent("*".white()));
+        execute!(stdout, MoveTo(x, y), PrintStyledContent("*".white()))?;
     }
     //doesn't matter if there aren't 10 stars on each run
     Ok(())
@@ -310,7 +307,7 @@ fn print_mary_joseph(width: u16, height: u16) -> io::Result<()> {
         PrintStyledContent("%%".blue()),
         MoveTo(width / 2 - 7, height - 1),
         PrintStyledContent("%%%".blue())
-    );
+    )?;
 
     queue!(
         stdout,
@@ -430,7 +427,8 @@ fn print_rays(width: u16, round: u16) {
         PrintStyledContent("|".yellow()),
         MoveTo(width / 2 + 1 + round, 4 + round),
         PrintStyledContent("\\".yellow())
-    );
+    )
+    .unwrap();
 }
 
 fn clear_rays() {
@@ -444,7 +442,8 @@ fn clear_rays() {
         Clear(terminal::ClearType::CurrentLine),
         MoveTo(1, 7),
         Clear(terminal::ClearType::CurrentLine),
-    );
+    )
+    .unwrap();
 }
 
 fn print_usage(program: &str, opts: Options) {
