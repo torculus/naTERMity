@@ -96,7 +96,7 @@ fn main() {
     let mut scene: u32;
     let five_min: TimeDelta = TimeDelta::minutes(5);
     let mut round: u16 = 0;
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     'outer: loop {
         dt = Local::now();
@@ -244,8 +244,8 @@ fn print_sky(width: u16, rng: &mut impl Rng) -> io::Result<()> {
 
     for _i in 1..10 {
         //generating (0,0) will throw an error: Goto is one-based
-        let x = rng.gen_range(1..width - 1);
-        let y = rng.gen_range(1..4);
+        let x = rng.random_range(1..width - 1);
+        let y = rng.random_range(1..4);
 
         //set a star at (x,y)
         execute!(stdout, MoveTo(x, y), PrintStyledContent("*".white()))?;
