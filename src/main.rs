@@ -96,6 +96,7 @@ fn main() {
     let mut scene: u32;
     let five_min: TimeDelta = TimeDelta::minutes(5);
     let mut round: u16 = 0;
+    let mut rng = rand::thread_rng();
 
     'outer: loop {
         dt = Local::now();
@@ -147,7 +148,7 @@ fn main() {
             }
 
             //twinkle stars in sky every second
-            print_sky(term_w).unwrap();
+            print_sky(term_w, &mut rng).unwrap();
             print_star(scene, term_w).unwrap();
             round = (round + 1) % 4;
             if scene > 1 {
@@ -231,8 +232,7 @@ fn print_stable_manger(width: u16, height: u16) -> io::Result<()> {
     )
 }
 
-fn print_sky(width: u16) -> io::Result<()> {
-    let mut rng = rand::thread_rng();
+fn print_sky(width: u16, rng: &mut impl Rng) -> io::Result<()> {
     let mut stdout = stdout();
 
     //clear the sky
