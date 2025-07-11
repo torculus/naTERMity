@@ -18,29 +18,19 @@
  *
  */
 extern crate getopts;
-use chrono::DateTime;
-use chrono::TimeDelta;
 use getopts::Options;
 
 extern crate crossterm;
-use crossterm::cursor::Show;
-use crossterm::terminal::LeaveAlternateScreen;
-use crate::crossterm::style::Stylize;
-use crossterm::cursor::Hide;
-use crossterm::cursor::MoveTo;
+use crossterm::cursor::{Hide, MoveTo, Show};
 use crossterm::event::{poll, read, Event, KeyEventKind};
-use crossterm::execute;
-use crossterm::style::Color;
-use crossterm::style::PrintStyledContent;
-use crossterm::terminal::size;
-use crossterm::terminal::Clear;
-use crossterm::terminal::EnterAlternateScreen;
-use crossterm::{queue, terminal};
-use std::{io, io::stdout};
+use crossterm::style::Stylize;
+use crossterm::style::{Color, PrintStyledContent};
+use crossterm::terminal::{size, Clear, EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::{execute, queue, terminal};
 
-use chrono::{Datelike, Local};
+use chrono::{DateTime, Datelike, Local, TimeDelta};
 use rand::Rng;
-use std::{env, thread, time};
+use std::{env, io, io::stdout, thread, time};
 
 const BROWN: Color = Color::Rgb {
     r: 139,
@@ -134,11 +124,11 @@ fn main() {
                 match read().unwrap() {
                     Event::Key(event) => {
                         //quit nicely on keypress
-			if event.kind == KeyEventKind::Press {
-			  execute!(stdout, Show, LeaveAlternateScreen).unwrap();
-			  terminal::disable_raw_mode().unwrap();
-			  std::process::exit(0)
-			}
+                        if event.kind == KeyEventKind::Press {
+                            execute!(stdout, Show, LeaveAlternateScreen).unwrap();
+                            terminal::disable_raw_mode().unwrap();
+                            std::process::exit(0)
+                        }
                     }
                     Event::Resize(new_w, new_h) => {
                         term_w = new_w;
