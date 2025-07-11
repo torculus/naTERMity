@@ -20,15 +20,15 @@
 extern crate getopts;
 use chrono::DateTime;
 use chrono::TimeDelta;
-use crossterm::cursor::Show;
-use crossterm::terminal::LeaveAlternateScreen;
 use getopts::Options;
 
 extern crate crossterm;
+use crossterm::cursor::Show;
+use crossterm::terminal::LeaveAlternateScreen;
 use crate::crossterm::style::Stylize;
 use crossterm::cursor::Hide;
 use crossterm::cursor::MoveTo;
-use crossterm::event::{poll, read, Event};
+use crossterm::event::{poll, read, Event, KeyEventKind};
 use crossterm::execute;
 use crossterm::style::Color;
 use crossterm::style::PrintStyledContent;
@@ -132,11 +132,13 @@ fn main() {
         loop {
             if poll(std::time::Duration::from_millis(500)).unwrap() {
                 match read().unwrap() {
-                    Event::Key(_event) => {
+                    Event::Key(event) => {
                         //quit nicely on keypress
-                        execute!(stdout, Show, LeaveAlternateScreen).unwrap();
-                        terminal::disable_raw_mode().unwrap();
-                        std::process::exit(0)
+			if event.kind == KeyEventKind::Press {
+			  execute!(stdout, Show, LeaveAlternateScreen).unwrap();
+			  terminal::disable_raw_mode().unwrap();
+			  std::process::exit(0)
+			}
                     }
                     Event::Resize(new_w, new_h) => {
                         term_w = new_w;
