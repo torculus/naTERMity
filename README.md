@@ -1,5 +1,5 @@
 # naTERMity
-naTERMity is an animated nativity terminal screensaver inspired by ChristBASHTree (https://github.com/sergiolepore/ChristBASHTree)
+naTERMity is a cross-platform animated nativity terminal screensaver inspired by ChristBASHTree (https://github.com/sergiolepore/ChristBASHTree)
 
 https://github.com/user-attachments/assets/24373b03-a703-4c96-965b-fa0d4901bc4f
 
