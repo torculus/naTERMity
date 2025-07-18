@@ -2,6 +2,11 @@
 name = "naTERMity"
 version = "1.0.0"
 edition = "2021"
+license = "GPL-3.0-or-later"
+description = "naTERMity is an animated nativity terminal screensaver"
+repository = "https://github.com/torculus/naTERMity"
+keywords = ["nativity", "terminal", "screensaver"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 chrono = "0.4.38"
