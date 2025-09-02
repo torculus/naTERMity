@@ -11,5 +11,5 @@ categories = ["command-line-utilities"]
 [dependencies]
 chrono = "0.4.38"
 crossterm = "0.29.0"
-getopts = "0.2.21"
+getopts = "0.2.24"
 rand = "0.9.1"
