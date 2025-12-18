@@ -16,8 +16,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-extern crate getopts;
-use getopts::Options;
+use clap::Parser;
+#[derive(Parser, Debug)]
+#[command(author = "Benjamin S Osenbach", version = "1.1.0", about = "An animated nativity terminal screensaver", long_about = None)]
+struct Args {
+    /// Christmas in July mode
+    #[arg(short, long)]
+    july: bool,
+
+    /// Orthodox Christmas mode
+    #[arg(short, long)]
+    orthodox: bool,
+}
 
 extern crate crossterm;
 use crossterm::cursor::{Hide, MoveTo, Show};
@@ -29,7 +39,7 @@ use crossterm::{execute, queue, terminal};
 
 use chrono::{DateTime, Datelike, Local, TimeDelta};
 use rand::Rng;
-use std::{env, io, io::stdout, thread, time};
+use std::{io, io::stdout, thread, time};
 
 const BROWN: Color = Color::Rgb {
     r: 139,
@@ -48,34 +58,12 @@ const ORANGE: Color = Color::Rgb {
 };
 
 fn main() {
-    let mut stdout = stdout();
-    terminal::enable_raw_mode().unwrap();
-    execute!(stdout, EnterAlternateScreen, Hide).unwrap();
-
-    let args: Vec<String> = env::args().collect();
-    let program = args[0].clone();
-
-    let mut opts: Options = Options::new();
-    opts.optflag("h", "help", "print this help menu");
-    opts.optflag("j", "july", "set Christmas in July mode");
-    opts.optflag("o", "orthodox", "set Orthodox calendar mode");
-
-    let matches = match opts.parse(&args[1..]) {
-        Ok(m) => m,
-        Err(f) => {
-            panic!("{}", f.to_string())
-        }
-    };
-
-    if matches.opt_present("h") {
-        print_usage(&program, opts);
-        return;
-    }
-
     let noel_month: u32;
-    if matches.opt_present("j") {
+    let args = Args::parse();
+
+    if args.july {
         noel_month = 7;
-    } else if matches.opt_present("o") {
+    } else if args.orthodox {
         noel_month = 1;
     } else {
         noel_month = 12;
@@ -86,6 +74,10 @@ fn main() {
     let five_min: TimeDelta = TimeDelta::minutes(5);
     let mut round: u16 = 0;
     let mut rng = rand::rng();
+
+    let mut stdout = stdout();
+    terminal::enable_raw_mode().unwrap();
+    execute!(stdout, EnterAlternateScreen, Hide).unwrap();
 
     'outer: loop {
         dt = Local::now();
@@ -435,9 +427,4 @@ fn clear_rays() {
         Clear(terminal::ClearType::CurrentLine),
     )
     .unwrap();
-}
-
-fn print_usage(program: &str, opts: Options) {
-    let brief = format!("Usage: {} [options]", program);
-    print!("{}", opts.usage(&brief));
 }
