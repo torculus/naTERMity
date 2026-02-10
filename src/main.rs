@@ -38,7 +38,7 @@ use crossterm::terminal::{size, Clear, EnterAlternateScreen, LeaveAlternateScree
 use crossterm::{execute, queue, terminal};
 
 use chrono::{DateTime, Datelike, Local, TimeDelta};
-use rand::Rng;
+use rand::{Rng,RngExt};
 use std::{io, io::stdout, thread, time};
 
 const BROWN: Color = Color::Rgb {
