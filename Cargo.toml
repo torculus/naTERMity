@@ -9,7 +9,7 @@ keywords = ["nativity", "terminal", "screensaver"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-chrono = "0.4.43"
+chrono = "0.4.44"
 clap = { version = "4.5.58", features = ["derive"] }
 crossterm = "0.29.0"
 rand = "0.10.0"
